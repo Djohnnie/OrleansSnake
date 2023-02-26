@@ -72,6 +72,10 @@ public class GameGrain : Grain, IGameGrain
     public async Task ReadyGame()
     {
         _state.IsReady = true;
+
+        var gameCode = this.GetPrimaryKeyString();
+        var processingGrain = GrainFactory.GetGrain<IProcessingGrain>(gameCode);
+        await processingGrain.Ping();
     }
 
     public async Task UnreadyGame()
@@ -88,6 +92,13 @@ public class GameGrain : Grain, IGameGrain
 
         var playerGrain = GrainFactory.GetGrain<IPlayerGrain>(playerName);
         await playerGrain.ReadyPlayer();
+
+        var game = await GetGame();
+        
+        if (game.Players.All(p => p.IsReady))
+        {
+            await ReadyGame();
+        }
     }
 
     public async Task UpdateFood(string foodData)

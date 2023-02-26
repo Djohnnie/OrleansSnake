@@ -15,7 +15,15 @@ public interface IApiHelper<TLogic> : IApiHelper
     Task<IResult> Post<TResult>(Func<TLogic, Task<TResult>> logicCall);
 }
 
-public class ApiHelper<TLogic> : IApiHelper<TLogic>
+public class ApiHelper : IApiHelper
+{
+    public Task<IResult> Execute()
+    {
+        return Task.FromResult(Results.Ok());
+    }
+}
+
+public class ApiHelper<TLogic> : ApiHelper, IApiHelper<TLogic>
 {
     private readonly TLogic _logic;
     private readonly IMemoryCache _memoryCache;
@@ -26,11 +34,6 @@ public class ApiHelper<TLogic> : IApiHelper<TLogic>
         _logic = logic;
         _memoryCache = memoryCache;
         _logger = logger;
-    }
-
-    public Task<IResult> Execute()
-    {
-        return Task.FromResult(Results.Ok());
     }
 
     public async Task<IResult> Execute<TResult>(Expression<Func<TLogic, Task<TResult>>> logicCallExpression)

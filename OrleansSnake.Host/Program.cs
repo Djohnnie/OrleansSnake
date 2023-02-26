@@ -23,6 +23,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<GameCodeHelper>();
 builder.Services.AddTransient<GameManager>();
+builder.Services.AddTransient<IApiHelper, ApiHelper>();
 builder.Services.AddTransient(typeof(IApiHelper<>), typeof(ApiHelper<>));
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<TickerHub>();

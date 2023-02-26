@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\DotNet7AndCSharp11.OrleansContracts\OrleansSnake.Contracts.csproj" />
+		<ProjectReference Include="..\OrleansSnake.Contracts\OrleansSnake.Contracts.csproj" />
 	</ItemGroup>
 
 </Project>
