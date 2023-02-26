@@ -7,8 +7,6 @@ public interface IGameGrain : IGrainWithStringKey
     Task CreateGame();
     Task AddPlayer(Player player);
     Task<Game> GetGame();
-    Task ReadyGame();
-    Task UnreadyGame();
     Task ReadyPlayer(string playerName);
     Task UpdateFood(string foodData);
     Task UpdatePlayerStates(List<Contracts.PlayerState> playerStates);
@@ -69,20 +67,6 @@ public class GameGrain : Grain, IGameGrain
         };
     }
 
-    public async Task ReadyGame()
-    {
-        _state.IsReady = true;
-
-        var gameCode = this.GetPrimaryKeyString();
-        var processingGrain = GrainFactory.GetGrain<IProcessingGrain>(gameCode);
-        await processingGrain.Ping();
-    }
-
-    public async Task UnreadyGame()
-    {
-        _state.IsReady = false;
-    }
-
     public async Task ReadyPlayer(string playerName)
     {
         if (!_state.PlayerNames.Contains(playerName))
@@ -129,6 +113,11 @@ public class GameGrain : Grain, IGameGrain
             if (_state.PlayerNames.Count == 0)
             {
                 _state.IsActive = false;
+
+                var gameCode = this.GetPrimaryKeyString();
+                var processingGrain = GrainFactory.GetGrain<IProcessingGrain>(gameCode);
+                await processingGrain.Abandon();
+                
                 DeactivateOnIdle();
             }
         }
@@ -145,5 +134,14 @@ public class GameGrain : Grain, IGameGrain
         }
 
         return null;
+    }
+
+    private async Task ReadyGame()
+    {
+        _state.IsReady = true;
+
+        var gameCode = this.GetPrimaryKeyString();
+        var processingGrain = GrainFactory.GetGrain<IProcessingGrain>(gameCode);
+        await processingGrain.Ping();
     }
 }

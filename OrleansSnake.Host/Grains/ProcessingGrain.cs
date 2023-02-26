@@ -14,9 +14,11 @@ public interface IProcessingGrain : IGrainWithStringKey
 [PreferLocalPlacement]
 public class ProcessingGrain : Grain, IProcessingGrain
 {
+    private IDisposable? _timer;
+
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
-        RegisterTimer(OnTimer, null, TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(500));
+        _timer = RegisterTimer(OnTimer, null, TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(500));
 
         return base.OnActivateAsync(cancellationToken);
     }
@@ -28,6 +30,11 @@ public class ProcessingGrain : Grain, IProcessingGrain
 
     public Task Abandon()
     {
+        if (_timer != null)
+        {
+            _timer.Dispose();
+        }
+
         DeactivateOnIdle();
 
         return Task.CompletedTask;

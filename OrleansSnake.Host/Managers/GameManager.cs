@@ -1,7 +1,6 @@
 ﻿using OrleansSnake.Host.Grains;
 using OrleansSnake.Host.Helpers;
 using OrleansSnake.Contracts;
-using PlayerState = OrleansSnake.Contracts.PlayerState;
 
 namespace OrleansSnake.Host.Managers;
 
@@ -33,13 +32,6 @@ public class GameManager
             gameCode = _gameCodeHelper.GenerateGameCode();
         }
         while (await gamesGrain.GameCodeExists(gameCode));
-
-        var game = new Game
-        {
-            Code = gameCode,
-            IsActive = true,
-            FoodData = new Food { Bites = new List<Bite>() }.ToFoodData()
-        };
 
         var player = new Player
         {
@@ -91,36 +83,11 @@ public class GameManager
             activeGames.Select(x => new ActiveGame(x.Code, x.IsReady, x.Players.Select(p => new ActivePlayer(p.Name, p.IsReady, p.SnakeData)).ToList(), x.FoodData)).ToList());
     }
 
-    public async Task<Orientation> GetPlayerOrientation(string gameCode, string playerName, Orientation current)
-    {
-        var gameGrain = _grainFactory.GetGrain<IGameGrain>(gameCode);
-        var orientation = await gameGrain.GetPlayerOrientation(playerName);
-
-        if (orientation != null)
-        {
-            return orientation.Value;
-        }
-
-        return current;
-    }
-
     public async Task<AbandonResponse> Abandon(AbandonRequest request)
     {
         var gamesGrain = _grainFactory.GetGrain<IGamesGrain>(Guid.Empty);
         await gamesGrain.AbandonPlayer(request.GameCode, request.PlayerName);
 
         return new AbandonResponse();
-    }
-
-    public async Task UpdatePlayerStates(ActiveGame activeGame, List<PlayerState> playerStates)
-    {
-        var gameGrain = _grainFactory.GetGrain<IGameGrain>(activeGame.GameCode);
-        await gameGrain.UpdatePlayerStates(playerStates);
-    }
-
-    public async Task UpdateFood(ActiveGame activeGame, Food food)
-    {
-        var gameGrain = _grainFactory.GetGrain<IGameGrain>(activeGame.GameCode);
-        await gameGrain.UpdateFood(food.ToFoodData());
     }
 }
