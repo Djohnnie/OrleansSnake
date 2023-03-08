@@ -36,15 +36,21 @@ public class Game
     public string Code { get; set; }
 
     [Id(1)]
-    public bool IsReady { get; set; }
+    public int Width { get; set; }
 
     [Id(2)]
-    public bool IsActive { get; set; }
+    public int Height { get; set; }
 
     [Id(3)]
-    public string FoodData { get; set; }
+    public bool IsReady { get; set; }
 
     [Id(4)]
+    public bool IsActive { get; set; }
+
+    [Id(5)]
+    public string FoodData { get; set; }
+
+    [Id(6)]
     public List<Player> Players { get; set; }
 }
 

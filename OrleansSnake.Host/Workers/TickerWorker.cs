@@ -36,8 +36,8 @@ public class TickerWorker : BackgroundService
 
                 var gameState = new GameState
                 {
-                    Width = GameManager.SnakeGameWidth,
-                    Height = GameManager.SnakeGameHeight,
+                    Width = activeGame.Width,
+                    Height = activeGame.Height,
                     IsReady = isReady,
                     GameCode = activeGame.GameCode,
                     Players = activeGame.Players.Select(x => new PlayerState
@@ -53,7 +53,7 @@ public class TickerWorker : BackgroundService
             }
 
             stopWatch.Stop();
-            await Task.Delay(Math.Max(0, 500 - (int)stopWatch.ElapsedMilliseconds), stoppingToken);
+            await Task.Delay(Math.Max(0, 250 - (int)stopWatch.ElapsedMilliseconds), stoppingToken);
         }
     }
 }

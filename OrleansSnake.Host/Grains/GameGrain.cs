@@ -1,4 +1,5 @@
 ﻿using OrleansSnake.Contracts;
+using OrleansSnake.Host.Managers;
 
 namespace OrleansSnake.Host.Grains;
 
@@ -17,6 +18,8 @@ public interface IGameGrain : IGrainWithStringKey
 public class GameState
 {
     public string Code { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
     public bool IsReady { get; set; }
     public bool IsActive { get; set; }
     public string FoodData { get; set; }
@@ -30,6 +33,8 @@ public class GameGrain : Grain, IGameGrain
     public Task CreateGame()
     {
         _state.Code = this.GetPrimaryKeyString();
+        _state.Width = GameManager.SnakeGameWidth;
+        _state.Height = GameManager.SnakeGameHeight;
         _state.IsReady = false;
         _state.IsActive = true;
         _state.FoodData = new Food { Bites = new List<Bite>() }.ToFoodData();
@@ -48,6 +53,10 @@ public class GameGrain : Grain, IGameGrain
 
     public async Task<Game> GetGame()
     {
+        var gameCode = this.GetPrimaryKeyString();
+        var processingGrain = GrainFactory.GetGrain<IProcessingGrain>(gameCode);
+        await processingGrain.Ping();
+        
         var players = new List<Player>();
 
         foreach (var playerName in _state.PlayerNames)
@@ -60,6 +69,8 @@ public class GameGrain : Grain, IGameGrain
         return new Game
         {
             Code = _state.Code,
+            Width = _state.Width,
+            Height = _state.Height,
             IsReady = _state.IsReady,
             IsActive = _state.IsActive,
             FoodData = _state.FoodData,
@@ -78,7 +89,7 @@ public class GameGrain : Grain, IGameGrain
         await playerGrain.ReadyPlayer();
 
         var game = await GetGame();
-        
+
         if (game.Players.All(p => p.IsReady))
         {
             await ReadyGame();
@@ -117,7 +128,7 @@ public class GameGrain : Grain, IGameGrain
                 var gameCode = this.GetPrimaryKeyString();
                 var processingGrain = GrainFactory.GetGrain<IProcessingGrain>(gameCode);
                 await processingGrain.Abandon();
-                
+
                 DeactivateOnIdle();
             }
         }

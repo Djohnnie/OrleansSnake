@@ -10,7 +10,7 @@ public record ReadyPlayerRequest(string GameCode, string PlayerName);
 public record ReadyPlayerResponse;
 
 public record GetActiveGamesResponse(List<ActiveGame> ActiveGames);
-public record ActiveGame(string GameCode, bool IsReady, List<ActivePlayer> Players, string FoodData);
+public record ActiveGame(string GameCode, int Width, int Height, bool IsReady, List<ActivePlayer> Players, string FoodData);
 public record ActivePlayer(string PlayerName, bool IsReady, string SnakeData);
 
 public record AbandonRequest(string GameCode, string PlayerName);

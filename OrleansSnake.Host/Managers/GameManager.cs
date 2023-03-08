@@ -80,7 +80,7 @@ public class GameManager
         var activeGames = await gamesGrain.GetActiveGames();
 
         return new GetActiveGamesResponse(
-            activeGames.Select(x => new ActiveGame(x.Code, x.IsReady, x.Players.Select(p => new ActivePlayer(p.Name, p.IsReady, p.SnakeData)).ToList(), x.FoodData)).ToList());
+            activeGames.Select(x => new ActiveGame(x.Code, x.Width, x.Height, x.IsReady, x.Players.Select(p => new ActivePlayer(p.Name, p.IsReady, p.SnakeData)).ToList(), x.FoodData)).ToList());
     }
 
     public async Task<AbandonResponse> Abandon(AbandonRequest request)

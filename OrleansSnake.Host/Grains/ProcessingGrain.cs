@@ -18,7 +18,7 @@ public class ProcessingGrain : Grain, IProcessingGrain
 
     public override Task OnActivateAsync(CancellationToken cancellationToken)
     {
-        _timer = RegisterTimer(OnTimer, null, TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(500));
+        _timer = RegisterTimer(OnTimer, null, TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(250));
 
         return base.OnActivateAsync(cancellationToken);
     }
@@ -104,7 +104,7 @@ public class ProcessingGrain : Grain, IProcessingGrain
                     }
                 };
 
-                var newState = ProgressSnake(newPlayerState, shouldGrow);
+                var newState = ProgressSnake(newPlayerState, game, shouldGrow);
                 newPlayerStates.Add(newState);
             }
 
@@ -155,7 +155,7 @@ public class ProcessingGrain : Grain, IProcessingGrain
         return food;
     }
 
-    private Contracts.PlayerState ProgressSnake(Contracts.PlayerState playerState, bool shouldGrow)
+    private Contracts.PlayerState ProgressSnake(Contracts.PlayerState playerState, Game game, bool shouldGrow)
     {
         var snake = playerState.Snake;
 
@@ -164,16 +164,36 @@ public class ProcessingGrain : Grain, IProcessingGrain
         switch (snake.Orientation)
         {
             case Orientation.North:
-                moveFunc = coordinates => coordinates with { Y = coordinates.Y - 1 };
+                moveFunc = coordinates =>
+                {
+                    var newY = coordinates.Y - 1 < 0 ? game.Height - 1 : coordinates.Y - 1;
+                    return coordinates with { Y = newY };
+                };
+
                 break;
             case Orientation.East:
-                moveFunc = coordinates => coordinates with { X = coordinates.X + 1 };
+                moveFunc = coordinates =>
+                {
+                    var newX = coordinates.X + 1 >= game.Width ? 0 : coordinates.X + 1;
+                    return coordinates with { X = newX };
+                };
+
                 break;
             case Orientation.South:
-                moveFunc = coordinates => coordinates with { Y = coordinates.Y + 1 };
+                moveFunc = coordinates =>
+                {
+                    var newY = coordinates.Y + 1 >= game.Height ? 0 : coordinates.Y + 1;
+                    return coordinates with { Y = newY };
+                };
+
                 break;
             case Orientation.West:
-                moveFunc = coordinates => coordinates with { X = coordinates.X - 1 };
+                moveFunc = coordinates =>
+                {
+                    var newX = coordinates.X - 1 < 0 ? game.Width - 1 : coordinates.X - 1;
+                    return coordinates with { X = newX };
+                };
+
                 break;
         }
 
